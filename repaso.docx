@@ -1,0 +1,66 @@
+      --ALTER TABLE--
+Ejemplo de Alter-Table (cambia el nombre de la tabla): ALTER TABLE articulos CHANGE COLUMN Codigo_fabricantes Fabricante INT(8);
+Ejemplo de Alter-Table (cambia valores de la tabla): ALTER TABLE amigos MODIFY telefono VARCHAR(50) NOT NULL;
+
+COmo lo podes usar papa? asi: DROP COLUMN : RENAME TO : CHANGE COLUMN :
+
+      --SELECT--
+INSERT INTO nombre_de_la_table VALUES (dato1, dato2, dato3, ...);
+Inserta un "insert" a la tabla fabricantes donde agrega el , y Asus: insert into fabricantes VALUES('1', 'Asus'); 
+Si es autoincremente ponemos 'NULL': INSERT INTO productos VALUES (NULL, ‘TABLETA DISEÑO GRÁFICO MOUSEPEN’, 0, 5100, 3700);
+
+La sentencia DISTINCT funciona en conjuncion con SELECT.
+Ejemplo: SELECT DISTINCT nombre, apellido FROM CLIENTES;
+
+
+      --UPDATE--
+
+UPDATE nombre_de_la_tabla SET campo2 = ‘dato2’;
+SEPARAMOS CON ',': UPDATE nombre_de_la_tabla SET campo1 = ‘dato1’, campo2 = ‘dato2’, campo3 = ‘dato3’;
+
+      --DELETE && TRUNCATE--
+
+Elimina registros: DELETE FROM nombre_de_la_table WHERE (campo = 'dato');
+Elimina todos los registros de una: TRUNCATE nombre_de_la_tabla;
+
+      --LIKE--
+
+Muestra los datos de los empleados cuyo nombrecomienza con M: WHERE nombres LIKE 'M%';
+
+      --AVG--
+    
+Demuestra el promedio de lo que le mandes: SELECT AVG(salario) FROM empleados;
+
+      --COUNT--
+
+COUND(*) Retorna como resultado la cantidad de tuplas involucradas en el conjunto de entrada. 
+Ejemplo: SLEECT COUNT(*) FROM empleados where depto_nro = 2;
+
+      --MAX--
+
+Retorna como resultado el valor más grande dentro del conjunto de tuplas para el atributo indicado
+Ejemplo: SELECT MAX(salario) FROM empleados;
+
+      --MIN--
+Retorna como resultado el valor más pequeño dentro del conjunto de tuplas para el atributo indicado
+Ejemplo: SELECT MIN(salario) from empleados;
+
+      -SUM--
+
+Retorna como resultado la suma del valor del atributo indicado para todas las tuplas del conjunto El atributo debe ser de tipo numérico
+Ejemplo: SELECT(sum) from empleados;
+
+      --ORDER BY--
+GROUP BY agrupa filas con valores idénticos en columnas especificadas. 
+Se puede ordenar los resultado usando ORDER BY con ASC (ascendente) o DESC (descendente). Por ejemplo:
+SELECT departamento, AVG(salario) FROM empleados GROUP BY departamento ORDER BY AVG(salario) DESC;
+
+      --HAVING--
+
+Indica la condición de filtro que debe respetar un grupo Dentro de esta clausula se pueden utilizar funciones de agregación
+EJEMPLO: SELECT a.nombre FROM articulos a HAVING AVG(salario) > 10000;
+
+      --UPDATE--
+
+Actualiza, cambiano el valor de un insert, por un valor nuevo.
+Ejemplo: UPDATE fabricantes SET codigo = 12 WHERE codigo = 11;
