@@ -44,6 +44,7 @@ SELECT email, nombre, apellido1, apellido2 FROM empleado WHERE codigo_jefe = 7;
 /* 4. Devuelve el nombre del puesto, nombre, apellidos y email del jefe de la empresa */
 
 SELECT puesto, nombre, apellido1, apellido2, email FROM empleado WHERE codigo_jefe IS NULL;
+-- Porque no tiene jefe
 
 +------------------+--------+-----------+-----------+----------------------+
 | puesto           | nombre | apellido1 | apellido2 | email                |
@@ -117,15 +118,19 @@ repetidos. Resuelva la consulta:
  Utilizando DATE_FORMAT
  Sin utilizar ninguna de las funciones anteriores.*/
 
-SELECT DISTINCT c.codigo_cliente, p.fecha_pago FROM cliente c, pago p WHERE DATE_FORMAT(fecha_pago, '%Y') = '2008';
+SELECT DISTINCT c.codigo_cliente, p.fecha_pago FROM cliente c JOIN pago p ON c.codigo_cliente = p.codigo_cliente GROUP BY p.codigo_cliente HAVING DATE_FORMAT(fecha_pago, '%Y') = '2008';
 
-SELECT DISTINCT c.codigo_cliente, p.fecha_pago FROM cliente c, pago p WHERE YEAR(fecha_pago) = 2008;
 
-SELECT DISTINCT c.codigo_cliente, p.fecha_pago FROM cliente c, pago p WHERE fecha_pago >= '2008-01-01' AND fecha_pago < '2009-01-01';
+SELECT DISTINCT c.codigo_cliente, p.fecha_pago FROM cliente c JOIN pago p ON c.codigo_cliente = p.codigo_cliente GROUP BY c.codigo_cliente HAVING YEAR(fecha_pago) = 2008;
+
+SELECT DISTINCT c.codigo_cliente, p.fecha_pago FROM cliente c JOIN pago p ON c.codigo_cliente = p.codigo_cliente GROUP BY c.codigo_cliente HAVING fecha_pago >= '2008-01-01' AND fecha_pago < '2009-01-01';
 
 /* 9. Devuelve un listado con el código de pedido, código de cliente, fecha esperada y fecha de
 entrega de los pedidos que no han sido entregados a tiempo.*/
-SELECT c.codigo_cliente, p.fecha_esperada, p.fecha_entrega, p.estado FROM cliente c, pedido p WHERE p.fecha_esperada < p.fecha_entrega AND estado = 'Entregado';
+
+SELECT c.codigo_cliente, p.fecha_esperada, p.fecha_entrega, p.estado FROM cliente c JOIN pedido p ON p.codigo_cliente = c.codigo_cliente HAVING p.fecha_esperada < p.fecha_entrega AND estado = 'Entregado';
+
+SELECT codigo_pedido, codigo_cliente, fecha_esperada, fecha_entrega from pedido WHERE estado = "Pendiente" and fecha_entrega IS NOT NULL;
 
 /*10  Devuelve un listado con el código de pedido, código de cliente, fecha esperada y fecha de
 entrega de los pedidos cuya fecha de entrega ha sido al menos dos días antes de la fecha
@@ -133,7 +138,9 @@ esperada.
  Utilizando la función ADDDATE
  Utilizando la función DATEDIFF */
 
-SELECT p.codigo_pedido, c.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM cliente c, pedido p WHERE fecha_entrega <= ADDDATE(fecha_esperada, -2);
+SELECT p.codigo_pedido, c.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM cliente c JOIN pedido p on c.codigo_cliente = p.codigo_cliente WHERE fecha_entrega <= ADDDATE(fecha_esperada, -2);
+
+SELECT codigo_pedido, codigo_cliente, fecha_esperada, fecha_entrega from pedido WHERE fecha_esperada >= DATE_ADD(fecha_entrega, INTERVAL 2 DAY);
 
 SELECT p.codigo_pedido, p.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM pedido p WHERE DATEDIFF(p.fecha_esperada, p.fecha_entrega) >= 2;
 
@@ -144,12 +151,12 @@ SELECT p.codigo_pedido, p.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM
 /*12. Devuelve un listado de todos los pedidos que han sido entregados en el mes de enero de
 cualquier año*/
 
-SELECT p.codigo_pedido, p.fecha_entrega FROM pedido p WHERE MONTH(fecha_entrega) = 1;
+SELECT p.codigo_pedido, p.fecha_entrega FROM pedido p WHERE estado = 'Entregado' AND MONTH(fecha_entrega) = 1;
 
 /*13 Devuelve un listado con todos los pagos que se realizaron en el año 2008 mediante Paypal.
 Ordene el resultado de mayor a menor*/
 
-SELECT p.forma_pago, p.fecha_pago FROM pago p WHERE YEAR(p.fecha_pago) = 2008 AND p.forma_pago = 'PayPal';
+SELECT p.id_transaccion, p.forma_pago, p.fecha_pago, p.total FROM pago p WHERE YEAR(p.fecha_pago) = 2008 AND p.forma_pago = 'PayPal' ORDER BY total DESC;
 
 /*14 Devuelve un listado con todas las formas de pago que aparecen en la tabla pago. Tenga en
 cuenta que no deben aparecer formas de pago repetidas.*/
@@ -165,23 +172,24 @@ SELECT p.nombre, p.gama, p.cantidad_en_stock, p.precio_venta FROM producto p WHE
 /*16. Devuelve un listado con todos los clientes que sean de la ciudad de Madrid y cuyo
 representante de ventas tenga el código de empleado 11 o 30.*/
 
-SELECT c.nombre_cliente, c.ciudad, e.codigo_empleado FROM cliente c, empleado e WHERE c.ciudad = 'Madrid' AND (e.codigo_empleado = 11 OR e.codigo_empleado = 30);
+SELECT c.nombre_cliente, c.ciudad FROM cliente c WHERE c.ciudad LIKE 'Madrid' AND c.codigo_empleado_rep_ventas = 11 OR 30;
 
 /*17. Obtén un listado con el nombre de cada cliente y el nombre y apellido de su representante de
 ventas.*/
 
-SELECT c.nombre_cliente, e.nombre, e.apellido1 FROM cliente c JOIN empleado e ON codigo_empleado_rep_ventas = e.codigo_empleado;
+SELECT c.nombre_cliente, e.nombre, e.apellido1, e.puesto FROM cliente c JOIN empleado e ON codigo_empleado_rep_ventas = e.codigo_empleado GROUP BY c.nombre_cliente HAVING e.puesto LIKE 'Rep%';
+
 
 /*18. Muestra el nombre de los clientes que hayan realizado pagos junto con el nombre de sus
 representantes de ventas.*/
 
-SELECT c.nombre_cliente, e.nombre AS nombre_representante FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN pago p ON c.codigo_cliente = p.codigo_cliente;
+SELECT c.nombre_cliente, e.nombre AS nombre_representante FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado WHERE c.codigo_cliente IN (SELECT codigo_cliente FROM pago);
 
 /*19. Muestra el nombre de los clientes que no hayan realizado pagos junto con el nombre de sus
 representantes de ventas.*/
-SELECT c.nombre_cliente, e.nombre FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado LEFT JOIN pago p ON c.codigo_cliente = p.codigo_cliente WHERE p.codigo_cliente IS NULL;
+SELECT c.nombre_cliente, e.nombre FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas =  e.codigo_empleado WHERE c.codigo_cliente NOT IN (SELECT codigo_cliente FROM pago);
 
 /*20. Devuelve el nombre de los clientes que han hecho pagos y el nombre de sus representantes
 junto con la ciudad de la oficina a la que pertenece el representante.*/ 
 
-SELECT c.nombre_cliente, c.codigo_cliente, e.nombre, o.ciudad FROM cliente c INNER JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado INNER JOIN oficina o ON e.codigo_oficina = o.codigo_oficina HAVING c.codigo_cliente IN(SELECT codigo_cliente FROM pago) ORDER BY c.codigo_cliente;
+SELECT c.nombre_cliente, c.codigo_cliente, e.nombre, o.ciudad FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE c.codigo_cliente IN(SELECT codigo_cliente FROM pago) ORDER BY c.codigo_cliente;

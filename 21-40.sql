@@ -4,7 +4,12 @@ SELECT c.nombre_cliente, e.nombre AS nombre_representante, o.ciudad FROM cliente
 
 /*2. Lista la dirección de las oficinas que tengan clientes en Fuenlabrada.*/
 
-SELECT c.region, o.linea_direccion2 FROM oficina o JOIN empleado e ON o.codigo_oficina = e.codigo_oficina JOIN cliente c ON codigo_empleado_rep_ventas = codigo_empleado AND c.region LIKE 'Fuenlabrada';
+-- SELECT c.nombre_cliente, c.ciudad, o.linea_direccion1 FROM oficina o JOIN empleado e ON o.codigo_oficina = e.codigo_oficina JOIN cliente c ON c.codigo_empleado_rep_ventas = e.codigo_empleado ORDER BY o.linea_direccion1 WHERE c.ciudad LIKE 'Fuenlabrada';
+
+SELECT c.nombre_cliente, c.ciudad, o.linea_direccion1 FROM oficina o JOIN empleado e ON o.codigo_oficina = e.codigo_oficina JOIN cliente c ON c.codigo_empleado_rep_ventas = e.codigo_empleado WHERE c.ciudad = 'Fuenlabrada' ORDER BY o.linea_direccion1;
+
+
+-- Porque esta es con empleado: select e.codigo_empleado, CONCAT(o.linea_direccion1, o.linea_direccion2) as "direccion", o.ciudad as "Ciudad de la oficina" FROM oficina o INNER JOIN empleado e ON o.codigo_oficina = e.codigo_oficina HAVING e.codigo_empleado IN (SELECT codigo_empleado_rep_ventas FROM cliente WHERE ciudad LIKE "Fuen%");
 
 /*3. Devuelve el nombre de los clientes y el nombre de sus representantes junto con la ciudad de la
 oficina a la que pertenece el representante.*/
@@ -12,15 +17,19 @@ oficina a la que pertenece el representante.*/
 SELECT c.nombre_cliente, e.nombre, o.ciudad FROM empleado e JOIN oficina o ON e.codigo_oficina = o.codigo_oficina JOIN cliente c ON c.codigo_empleado_rep_ventas = e.codigo_empleado;
 
 /*4. Devuelve un listado con el nombre de los empleados junto con el nombre de sus jefes.*/
-
-SELECT e.nombre AS empleado, j.nombre AS jefe FROM empleado e LEFT JOIN empleado j ON e.codigo_jefe = j.codigo_empleado;
+SELECT e.nombre, j.nombre FROM empleado e JOIN empleado j ON e.codigo_jefe = j.codigo_empleado;
 
 /*5. Devuelve el nombre de los clientes a los que no se les ha entregado a tiempo un pedido.*/
 SELECT c.nombre_cliente, p.fecha_esperada, p.fecha_entrega, p.estado FROM cliente c JOIN pedido p ON c.codigo_cliente = p.codigo_cliente AND estado LIKE 'Entre%' AND fecha_esperada < fecha_entrega;
 
+--Es la de porta pero no me gusta... SELECT c.nombre_cliente, p.estado, p.fecha_entrega FROM cliente c INNER JOIN pedido p ON c.codigo_cliente = p.codigo_cliente HAVING p.estado = "Pendiente" AND p.fecha_entrega IS NOT NULL;
+
 /*6. Devuelve un listado de las diferentes gamas de producto que ha comprado cada cliente.*/
 
-SELECT DISTINCT c.nombre_cliente, g.gama FROM cliente c JOIN pedido p ON c.codigo_cliente = p.codigo_cliente JOIN detalle_pedido d ON p.codigo_pedido = d.codigo_pedido JOIN producto pr ON pr.codigo_producto = d.codigo_producto JOIN gama_producto g ON pr.gama = g.gama;
+--Porta:
+SELECT c.nombre_cliente, g.gama FROM cliente c JOIN pedido p ON c.codigo_cliente = p.codigo_cliente JOIN detalle_pedido d ON p.codigo_pedido = d.codigo_pedido JOIN producto pr ON pr.codigo_producto = d.codigo_producto JOIN gama_producto g ON pr.gama = g.gama;
+
+--no SELECT c.nombre_cliente, p.codigo_pedido, pr.gama FROM producto pr LEFT JOIN detalle_pedido dp ON dp.codigo_producto = pr.codigo_producto INNER JOIN pedido p ON p.codigo_pedido = dp.codigo_pedido INNER JOIN cliente c ON c.codigo_cliente = p.codigo_cliente GROUP BY codigo_pedido;
 
 /*7. Devuelve un listado que muestre solamente a los clientes que no han realizado ningún pago.*/
 
@@ -35,9 +44,8 @@ SELECT c.nombre_cliente FROM cliente c WHERE c.codigo_cliente NOT IN (SELECT cod
 
 /*10. Devuelve un listado que muestre solamente los empleados que no tienen una oficina asociada.*/
 SELECT e.nombre FROM empleado e LEFT JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE o.codigo_oficina IS NULL;
-
 SELECT e.nombre FROM empleado e WHERE e.codigo_oficina NOT IN (SELECT o.codigo_oficina FROM oficina o);
-
+SELECT nombre, codigo_empleado FROM empleado WHERE codigo_oficina IS NULL;
 
 /*11. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado.*/
 SELECT e.nombre FROM empleado e LEFT JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas WHERE c.codigo_empleado_rep_ventas IS NULL;
@@ -47,7 +55,7 @@ SELECT e.nombre FROM empleado e WHERE e.codigo_empleado NOT IN(SELECT codigo_emp
 /*12. Devuelve un listado que muestre los empleados que no tienen una oficina asociada y los que no
 tienen un cliente asociado.*/
 
-SELECT e.nombre FROM empleado e LEFT JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas LEFT JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE c.codigo_empleado_rep_ventas IS NULL AND o.codigo_oficina IS NULL;
+SELECT nombre, codigo_empleado FROM empleado WHERE codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente) AND codigo_oficina IS NULL;
 
 
 /* 13. Devuelve un listado de los productos que nunca han aparecido en un pedido. */
@@ -70,6 +78,7 @@ WHERE o.codigo_oficina NOT IN (
   WHERE e.puesto LIKE 'Rep%' AND g.gama LIKE 'Frut%'
 ); 
 
+
 /*15. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado
 ningún pago.*/
 SELECT c.nombre_cliente FROM cliente c WHERE c.codigo_cliente IN (SELECT codigo_cliente FROM pedido) AND c.codigo_cliente NOT IN (SELECT codigo_cliente FROM pago);
@@ -80,9 +89,6 @@ SELECT nombre, codigo_jefe FROM empleado WHERE codigo_empleado NOT IN (SELECT co
 
 SELECT e.nombre, j.nombre FROM empleado e LEFT JOIN empleado j ON j.codigo_empleado = e.codigo_jefe WHERE e.codigo_empleado NOT IN(SELECT codigo_empleado_rep_ventas FROM cliente); -- Este es!
 
-
-SELECT e.nombre as "nombre empleado", j.nombre as "nombre jefe", e.codigo_empleado, j.codigo_empleado as "codigo jefe" FROM empleado e INNER JOIN empleado j ON e.codigo_jefe = j.codigo_empleado WHERE e.codigo_empleado NOT IN(SELECT codigo_empleado_rep_ventas FROM cliente);
-
 /*17. ¿Cuántos empleados hay en la compañía?*/
 
 SELECT COUNT(e.codigo_empleado) AS empleados FROM empleado e;
@@ -92,8 +98,7 @@ SELECT c.pais, COUNT(c.codigo_cliente) AS clientes_por_pais FROM cliente c GROUP
 
 /*19. ¿Cuál fue el pago medio en 2009?*/
 
-SELECT AVG(p.total) AS pago_medio_2009 FROM pago p WHERE YEAR(p.fe  
-cha_pago) = 2009;
+SELECT AVG(p.total) AS pago_medio_2009 FROM pago p WHERE YEAR(p.fecha_pago) = 2009;
 
 /*20. ¿Cuántos pedidos hay en cada estado? Ordena el resultado de forma descendente por el
 número de pedidos.*/
