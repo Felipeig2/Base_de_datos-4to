@@ -38,11 +38,12 @@ SELECT e.nombre, e.apellido1, e.puesto, o.telefono FROM oficina o JOIN empleado 
 
 /*9. Devuelve el nombre, los apellidos y el email de los empleados que están a cargo de Alberto
 Soria.*/
-SELECT e.nombre, e.apellido1, e.apellido2, e.email FROM empleado e  WHERE e.codigo_jefe = (SELECT codigo_empleado FROM empleado WHERE nombre = 'Alberto' AND apellido1 = 'Soria');
+
+SELECT nombre, Apellido1, apellido2, email FROM empleado  WHERE codigo_jefe = (SELECT codigo_empleado FROM empleado WHERE nombre = 'Alberto' AND apellido1 = 'Soria');
 
 /*10. Devuelve el nombre del cliente con mayor límite de crédito. (utilizar ALL, ANY)*/
 SELECT nombre_cliente FROM cliente WHERE limite_credito >= ALL (SELECT limite_credito FROM cliente);
--- SELECT nombre_cliente FROM cliente WHERE limite_credito >= ANY (SELECT limite_credito FROM cliente);
+-- SELECT nombre_cliente FROM cliente WHERE limite_credito >= ANY (SELECT max(limite_credito) FROM cliente);
 
 /*11. Devuelve el nombre del producto que tenga el precio de venta más caro. (utilizar ALL, ANY)*/
 SELECT nombre, precio_venta FROM producto WHERE precio_venta >= ALL (SELECT precio_venta FROM producto);
@@ -56,7 +57,7 @@ SELECT nombre, precio_venta FROM producto WHERE precio_venta >= ALL (SELECT prec
 /*13. Devuelve el nombre, apellido1 y cargo de los empleados que no representan a ningún cliente.
 (Utilizar IN, NOT IN)*/
 
-SELECT e.nombre, e.apellido1 FROM empleado e WHERE codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente);
+SELECT e.nombre, e.apellido1 FROM empleado e WHERE e.codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente);
 --Con in?
 
 /*14. Devuelve un listado que muestre solamente a los clientes que no han realizado ningún pago.*/
@@ -75,11 +76,16 @@ SELECT e.nombre, e.apellido1, e.puesto, o.telefono FROM oficina o JOIN empleado 
 /*18. Devuelve un listado que muestre solamente a los clientes que no han realizado ningún pago.
 (Utilizar EXISTS y NOT EXISTS)*/
 
-SELECT c.nombre_cliente FROM cliente c WHERE NOT EXISTS (SELECT 1 FROM pago p WHERE p.codigo_cliente = c.codigo_cliente);
+SELECT c.nombre_cliente FROM cliente c WHERE NOT EXISTS (SELECT codigo_cliente FROM pago p WHERE p.codigo_cliente = c.codigo_cliente);
+
+-- SELECT c.nombre_cliente FROM cliente c WHERE NOT EXISTS (SELECT 1 FROM pago p WHERE p.codigo_cliente = c.codigo_cliente);
 
 /*19. Devuelve un listado que muestre solamente a los clientes que sí han realizado algún pago.
 (Utilizar EXISTS y NOT EXISTS)*/
-SELECT c.nombre_cliente FROM cliente c WHERE EXISTS (SELECT 1 FROM pago p WHERE p.codigo_cliente = c.codigo_cliente);
+SELECT c.nombre_cliente FROM cliente c WHERE EXISTS (SELECT codigo_cliente FROM pago p WHERE p.codigo_cliente = c.codigo_cliente);  
+-- SELECT c.nombre_cliente FROM cliente c WHERE EXISTS (SELECT 1 FROM pago p WHERE p.codigo_cliente = c.codigo_cliente);
+
+
 
 /*20. Devuelve un listado de los productos que nunca han aparecido en un pedido. (Utilizar EXISTS y
 NOT EXISTS)*/
@@ -89,4 +95,4 @@ SELECT pr.nombre FROM producto pr WHERE EXISTS (SELECT 1 FROM detalle_pedido dp 
 /*21. Devuelve el nombre de los clientes que hayan hecho pedidos en 2008 ordenados
 alfabéticamente de menor a mayor.*/
 
-SELECT c.nombre_cliente FROM cliente c WHERE EXISTS (SELECT 1 FROM pedido p WHERE c.codigo_cliente = p.codigo_cliente) ORDER BY c.nombre_cliente DESC;
+SELECT c.nombre_cliente, p.fecha_pedido FROM cliente c JOIN pedido p ON p.codigo_cliente = c.codigo_cliente WHERE YEAR(fecha_pedido) = 2008 AND EXISTS (SELECT 1 FROM pedido p WHERE c.codigo_cliente = p.codigo_cliente) ORDER BY c.nombre_cliente ASC;

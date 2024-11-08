@@ -133,14 +133,13 @@ esperada.
  Utilizando la función ADDDATE
  Utilizando la función DATEDIFF */
 
-SELECT p.codigo_pedido, c.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM cliente c, pedido p fecha_entrega <= ADDDATE(fecha_esperada, -2);
+SELECT p.codigo_pedido, c.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM cliente c, pedido p WHERE fecha_entrega <= ADDDATE(fecha_esperada, -2);
 
-SELECT p.codigo_pedido, c.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM pedido p, cliente c WHERE DATEDIFF(p.fecha_esperada, p.fecha_entrega) >= 2;
+SELECT p.codigo_pedido, p.codigo_cliente, p.fecha_esperada, p.fecha_entrega FROM pedido p WHERE DATEDIFF(p.fecha_esperada, p.fecha_entrega) >= 2;
 
  /*11. Devuelve un listado de todos los pedidos que fueron rechazados en 2009.*/
 
- SELECT p.codigo_pedido, p.fecha_entrega, p.estado FROM pedido p WHERE estado = 'Rechazado' AND DATE_FORMAT(fecha_entrega, '%Y') = '2009';
-
+ SELECT codigo_pedido, fecha_entrega, estado FROM pedido WHERE estado LIKE 'Rechazado' AND YEAR(fecha_entrega) LIKE '2009';
 
 /*12. Devuelve un listado de todos los pedidos que han sido entregados en el mes de enero de
 cualquier año*/
@@ -185,6 +184,4 @@ SELECT c.nombre_cliente, e.nombre FROM cliente c JOIN empleado e ON c.codigo_emp
 /*20. Devuelve el nombre de los clientes que han hecho pagos y el nombre de sus representantes
 junto con la ciudad de la oficina a la que pertenece el representante.*/ 
 
-SELECT c.nombre_cliente, e.nombre, o.ciudad FROM pago p JOIN cliente c ON p.codigo_cliente = c.codigo_cliente JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE p.codigo_cliente IS NOT NULL; -- ?
-
-SELECT c.nombre_cliente, e.nombre, o.ciudad FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE c.codigo_cliente IN(SELECT codigo_cliente FROM pago); -- ?
+SELECT c.nombre_cliente, c.codigo_cliente, e.nombre, o.ciudad FROM cliente c INNER JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado INNER JOIN oficina o ON e.codigo_oficina = o.codigo_oficina HAVING c.codigo_cliente IN(SELECT codigo_cliente FROM pago) ORDER BY c.codigo_cliente;

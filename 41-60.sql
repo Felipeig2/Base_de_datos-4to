@@ -31,7 +31,7 @@ deberá mostrar el nombre y los apellidos de cada cliente.*/
 SELECT c.nombre_cliente, c.apellido_contacto, MAX(p.fecha_pago) AS ultimo, MIN(p.fecha_pago) AS primero FROM cliente c JOIN pago p ON c.codigo_cliente = p.codigo_cliente GROUP BY c.nombre_cliente;
 
 /*8. Calcula el número de productos diferentes que hay en cada uno de los pedidos.*/
-SELECT COUNT(pr.nombre), pe.codigo_pedido FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto JOIN pedido pe ON pe.codigo_pedido = dp.codigo_pedido GROUP BY codigo_pedido;
+SELECT COUNT(pr.nombre), pe.codigo_pedido FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto JOIN pedido pe ON pe.codigo_pedido = dp.codigo_pedido GROUP BY pe.codigo_pedido;
 
 /*9 Calcula la suma de la cantidad total de todos los productos que aparecen en cada uno de los
 pedidos.*/
@@ -48,8 +48,7 @@ y el total facturado. La base imponible se calcula sumando el coste del producto
 de unidades vendidas de la tabla detalle_pedido. El IVA es el 21 % de la base imponible, y el
 total la suma de los dos campos anteriores.*/
 
-SELECT SUM(cantidad * precio_unidad) AS base_imponible, SUM(cantidad * precio_unidad) * 0.21 AS iva FROM 
-detalle_pedido;
+SELECT SUM(cantidad * precio_unidad) AS base_imponible, SUM(cantidad * precio_unidad) * 0.21 AS iva, SUM((cantidad * precio_unidad) - (cantidad * precio_unidad * 0.21)) AS  FROM detalle_pedido;
 
 /*12. La misma información que en la pregunta anterior, pero agrupada por código de producto.*/
 SELECT 
@@ -75,7 +74,7 @@ SELECT
 /*14. Lista las ventas totales de los productos que hayan facturado más de 3000 euros. Se mostrará
 el nombre, unidades vendidas, total facturado y total facturado con impuestos (21% IVA).*/
 
-SELECT pr.nombre, dp.cantidad AS unidaddes_vendidas, SUM(dp.precio_unidad * dp.cantidad) AS total_facturado,   SUM(dp.cantidad * dp.precio_unidad) * 0.21 AS total_facturado_iva FROM detalle_pedido dp JOIN producto pr ON pr.codigo_producto = dp.codigo_producto GROUP BY pr.nombre HAVING SUM(dp.precio_unidad * dp.cantidad) > 3000;
+SELECT pr.nombre, dp.cantidad AS unidaddes_vendidas, SUM(dp.precio_unidad * dp.cantidad) AS total_facturado, SUM(dp.cantidad * dp.precio_unidad) - SUM(dp.precio_unidad * dp.cantidad * 0.21) AS total_facturado_iva FROM detalle_pedido dp JOIN producto pr ON pr.codigo_producto = dp.codigo_producto GROUP BY pr.nombre HAVING SUM(dp.precio_unidad * dp.cantidad) > 3000;
 
 /*15. Devuelve el nombre del cliente con mayor límite de crédito.*/
 
@@ -93,7 +92,9 @@ puede obtener su nombre fácilmente.)*/
 --SELECT pr.nombre, MAX(dp.cantidad) AS total_unidades_vendidas FROM producto pr JOIN detalle_pedido dp --ON pr.codigo_producto = dp.codigo_producto;
 
 
-SELECT pr.nombre, SUM(dp.cantidad) AS total_unidades_vendidas FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto GROUP BY pr.codigo_producto ORDER BY total_unidades_vendidas DESC LIMIT 1;
+SELECT pr.nombre, dp.cantidad AS total_unidades_vendidas FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto WHERE dp.cantidad >= ALL(SELECT cantidad FROM detalle_pedido) ORDER BY pr.nombre DESC LIMIT 1;
+
+SELECT pr.nombre, dp.cantidad AS total_unidades_vendidas FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto WHERE dp.cantidad >= ANY(SELECT MAX(cantidad) FROM detalle_pedido) ORDER BY pr.nombre DESC LIMIT 1;
 
 /*18. Los clientes cuyo límite de crédito sea mayor que los pagos que haya realizado. (Sin
 utilizar INNER JOIN).*/
