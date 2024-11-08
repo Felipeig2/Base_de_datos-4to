@@ -185,5 +185,6 @@ SELECT c.nombre_cliente, e.nombre FROM cliente c JOIN empleado e ON c.codigo_emp
 /*20. Devuelve el nombre de los clientes que han hecho pagos y el nombre de sus representantes
 junto con la ciudad de la oficina a la que pertenece el representante.*/ 
 
-SELECT c.nombre_cliente, e.nombre, o.ciudad FROM pago p JOIN cliente c ON p.codigo_cliente = c.codigo_cliente JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE p.codigo_cliente IS NOT NULL;
+SELECT c.nombre_cliente, e.nombre, o.ciudad FROM pago p JOIN cliente c ON p.codigo_cliente = c.codigo_cliente JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE p.codigo_cliente IS NOT NULL; -- ?
 
+SELECT c.nombre_cliente, e.nombre, o.ciudad FROM cliente c JOIN empleado e ON c.codigo_empleado_rep_ventas = e.codigo_empleado JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE c.codigo_cliente IN(SELECT codigo_cliente FROM pago); -- ?

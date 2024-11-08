@@ -36,13 +36,19 @@ SELECT c.nombre_cliente FROM cliente c WHERE c.codigo_cliente NOT IN (SELECT cod
 /*10. Devuelve un listado que muestre solamente los empleados que no tienen una oficina asociada.*/
 SELECT e.nombre FROM empleado e LEFT JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE o.codigo_oficina IS NULL;
 
+SELECT e.nombre FROM empleado e WHERE e.codigo_oficina NOT IN (SELECT o.codigo_oficina FROM oficina o);
+
+
 /*11. Devuelve un listado que muestre solamente los empleados que no tienen un cliente asociado.*/
 SELECT e.nombre FROM empleado e LEFT JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas WHERE c.codigo_empleado_rep_ventas IS NULL;
+
+SELECT e.nombre FROM empleado e WHERE e.codigo_empleado NOT IN(SELECT codigo_empleado_rep_ventas FROM cliente);
 
 /*12. Devuelve un listado que muestre los empleados que no tienen una oficina asociada y los que no
 tienen un cliente asociado.*/
 
 SELECT e.nombre FROM empleado e LEFT JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas LEFT JOIN oficina o ON e.codigo_oficina = o.codigo_oficina WHERE c.codigo_empleado_rep_ventas IS NULL AND o.codigo_oficina IS NULL;
+
 
 /* 13. Devuelve un listado de los productos que nunca han aparecido en un pedido. */
 SELECT codigo_producto, nombre FROM  producto WHERE codigo_producto NOT IN (SELECT codigo_producto FROM detalle_pedido);

@@ -12,14 +12,16 @@ SELECT COUNT(c.nombre_cliente) AS clientes_madrilenios FROM cliente c WHERE c.ci
 
 /*4. ¿Calcula cuántos clientes tiene cada una de las ciudades que empiezan por M?*/
 
-SELECT COUNT(c.nombre_cliente) AS clientes_madrilenios FROM cliente c WHERE c.ciudad LIKE 'M%';
+SELECT COUNT(c.codigo_cliente), c.ciudad AS clientes_madrilenios  FROM cliente c WHERE c.ciudad LIKE 'M%'  GROUP BY c.ciudad  ORDER BY c.ciudad;
 
 /*5. Devuelve el nombre de los representantes de ventas y el número de clientes al que atiende
 cada uno.*/
 
-SELECT e.nombre, COUNT(c.nombre_cliente) FROM empleado e JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas GROUP BY e.nombre ASC;
+SELECT e.nombre, COUNT(c.nombre_cliente) FROM empleado e JOIN cliente c ON e.codigo_empleado = c.codigo_empleado_rep_ventas WHERE puesto LIKE 'Rep%' GROUP BY e.nombre ASC;
 
 /*6. Calcula el número de clientes que no tiene asignado representante de ventas.*/
+
+SELECT COUNT(c.codigo_cliente) AS clientes_sin_rep FROM cliente c WHERE c.codigo_empleado_rep_ventas NOT IN (SELECT codigo_empleado FROM empleado WHERE puesto LIKE 'Rep%');
 
 SELECT COUNT(c.nombre_cliente) FROM cliente c WHERE c.codigo_empleado_rep_ventas IS NULL; -- Raro
 
@@ -33,7 +35,7 @@ SELECT COUNT(pr.nombre), pe.codigo_pedido FROM producto pr JOIN detalle_pedido d
 
 /*9 Calcula la suma de la cantidad total de todos los productos que aparecen en cada uno de los
 pedidos.*/
-SELECT COUNT(dp.cantidad), pe.codigo_pedido FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto JOIN pedido pe ON pe.codigo_pedido = dp.codigo_pedido GROUP BY codigo_pedido; -- Raro
+SELECT SUM(dp.cantidad), pe.codigo_pedido FROM producto pr JOIN detalle_pedido dp ON pr.codigo_producto = dp.codigo_producto JOIN pedido pe ON pe.codigo_pedido = dp.codigo_pedido GROUP BY pe.codigo_pedido; 
 
 /*10. Devuelve un listado de los 20 productos más vendidos y el número total de unidades que se
 han vendido de cada uno. El listado deberá estar ordenado por el número total de unidades
