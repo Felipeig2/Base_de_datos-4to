@@ -102,8 +102,9 @@ utilizar INNER JOIN).*/
 SELECT c.limite_credito, p.total FROM cliente c, pago p WHERE c.codigo_cliente = p.codigo_cliente AND c.limite_credito > p.total;
 
 /*19. Devuelve el producto que más unidades tiene en stock.*/
-SELECT pr.nombre, MAX(pr.cantidad_en_stock) AS mas_unidades FROM producto pr;
+SELECT pr.nombre, pr.cantidad_en_stock AS menos_unidades FROM producto pr WHERE cantidad_en_stock = (SELECT max(cantidad_en_stock) FROM producto);
+
 
 /*20. Devuelve el producto que menos unidades tiene en stock.*/
 
-SELECT pr.nombre, MIN(pr.cantidad_en_stock) AS menos_unidades FROM producto pr;
+SELECT pr.nombre, pr.cantidad_en_stock AS menos_unidades FROM producto pr WHERE cantidad_en_stock = (SELECT min(cantidad_en_stock) FROM producto);
