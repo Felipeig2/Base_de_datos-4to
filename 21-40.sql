@@ -68,27 +68,34 @@ WHERE o.codigo_oficina NOT IN (
   JOIN producto pr ON dp.codigo_producto = pr.codigo_producto
   JOIN gama_producto g ON pr.gama = g.gama
   WHERE e.puesto LIKE 'Rep%' AND g.gama LIKE 'Frut%'
-);
+); 
 
 /*15. Devuelve un listado con los clientes que han realizado algún pedido pero no han realizado
 ningún pago.*/
 SELECT c.nombre_cliente FROM cliente c WHERE c.codigo_cliente IN (SELECT codigo_cliente FROM pedido) AND c.codigo_cliente NOT IN (SELECT codigo_cliente FROM pago);
 
-/*16. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el
-nombre de su jefe asociado.*/
+/*16. Devuelve un listado con los datos de los empleados que no tienen clientes asociados y el nombre de su jefe asociado.*/
 
-SELECT nombre, codigo_jefe FROM empleado WHERE codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente);
+SELECT nombre, codigo_jefe FROM empleado WHERE codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente); 
+
+SELECT e.nombre, j.nombre FROM empleado e LEFT JOIN empleado j ON j.codigo_empleado = e.codigo_jefe WHERE e.codigo_empleado NOT IN(SELECT codigo_empleado_rep_ventas FROM cliente); -- Este es!
+
+
+SELECT e.nombre as "nombre empleado", j.nombre as "nombre jefe", e.codigo_empleado, j.codigo_empleado as "codigo jefe" FROM empleado e INNER JOIN empleado j ON e.codigo_jefe = j.codigo_empleado WHERE e.codigo_empleado NOT IN(SELECT codigo_empleado_rep_ventas FROM cliente);
 
 /*17. ¿Cuántos empleados hay en la compañía?*/
-SELECT SUM(e.codigo_empleado) AS empleados FROM empleado e;
+
+SELECT COUNT(e.codigo_empleado) AS empleados FROM empleado e;
+
 /*18. ¿Cuántos clientes tiene cada país?*/
-SELECT c.pais, SUM(c.codigo_cliente) AS clientes_por_pais FROM cliente c GROUP BY c.pais DESC;
+SELECT c.pais, COUNT(c.codigo_cliente) AS clientes_por_pais FROM cliente c GROUP BY c.pais DESC;  
 
 /*19. ¿Cuál fue el pago medio en 2009?*/
 
-SELECT AVG(p.total) AS pago_medio_2009 FROM pago p WHERE YEAR(p.fecha_pago) = 2009;
+SELECT AVG(p.total) AS pago_medio_2009 FROM pago p WHERE YEAR(p.fe  
+cha_pago) = 2009;
 
 /*20. ¿Cuántos pedidos hay en cada estado? Ordena el resultado de forma descendente por el
 número de pedidos.*/
 
-SELECT p.estado, COUNT(p.codigo_pedido) AS pedido_por_estado FROM pedido p JOIN detalle_pedido dp ON p.codigo_pedido = dp.codigo_pedido GROUP BY p.estado ORDER BY p.codigo_pedido DESC;
+SELECT estado, count(estado) as 'Cantidad de cada pedido en los estados' FROM pedido GROUP BY estado ORDER BY count(estado) DESC;

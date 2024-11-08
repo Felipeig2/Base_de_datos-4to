@@ -39,20 +39,22 @@ SELECT e.nombre, e.apellido1, e.puesto, o.telefono FROM oficina o JOIN empleado 
 /*9. Devuelve el nombre, los apellidos y el email de los empleados que están a cargo de Alberto
 Soria.*/
 
-SELECT nombre, Apellido1, apellido2, email FROM empleado  WHERE codigo_jefe = (SELECT codigo_empleado FROM empleado WHERE nombre = 'Alberto' AND apellido1 = 'Soria');
+SELECT nombre, Apellido1, apellido2, email FROM empleado  WHERE codigo_empleado = (SELECT codigo_jefe FROM empleado WHERE nombre = 'Alberto' AND apellido1 = 'Soria');
 
 /*10. Devuelve el nombre del cliente con mayor límite de crédito. (utilizar ALL, ANY)*/
 SELECT nombre_cliente FROM cliente WHERE limite_credito >= ALL (SELECT limite_credito FROM cliente);
--- SELECT nombre_cliente FROM cliente WHERE limite_credito >= ANY (SELECT max(limite_credito) FROM cliente);
+SELECT nombre_cliente FROM cliente WHERE limite_credito >= ANY (SELECT max(limite_credito) FROM cliente);
 
 /*11. Devuelve el nombre del producto que tenga el precio de venta más caro. (utilizar ALL, ANY)*/
+
 SELECT nombre, precio_venta FROM producto WHERE precio_venta >= ALL (SELECT precio_venta FROM producto);
--- SELECT nombre, precio_venta FROM producto WHERE precio_venta >= ANY (SELECT precio_venta FROM producto);
+SELECT nombre, precio_venta FROM producto WHERE precio_venta >= ANY (SELECT MAX(precio_venta) FROM producto);
 
 /*12. Devuelve el producto que menos unidades tiene en stock. (utilizar ALL, ANY)*/
 
--- SELECT nombre, cantidad_en_stock FROM producto WHERE cantidad_en_stock < ALL (SELECT cantidad_en_stock FROM producto);
--- SELECT nombre, cantidad_en_stock FROM producto WHERE cantidad_en_stock = ANY (SELECT cantidad_en_stock FROM producto WHERE cantidad_en_stock < (SELECT MIN(cantidad_en_stock) FROM producto));
+SELECT nombre, cantidad_en_stock FROM producto WHERE cantidad_en_stock <= ALL (SELECT cantidad_en_stock FROM producto);
+
+SELECT nombre, cantidad_en_stock FROM producto WHERE cantidad_en_stock <= ANY (SELECT MIN(cantidad_en_stock) FROM producto);
 
 /*13. Devuelve el nombre, apellido1 y cargo de los empleados que no representan a ningún cliente.
 (Utilizar IN, NOT IN)*/
@@ -69,9 +71,8 @@ SELECT nombre_cliente FROM cliente WHERE codigo_cliente IN (SELECT codigo_client
 /*16. Devuelve un listado de los productos que nunca han aparecido en un pedido.*/
 SELECT nombre FROM producto WHERE codigo_producto NOT IN (SELECT codigo_producto FROM detalle_pedido);
 
-/*17. Devuelve el nombre, apellidos, puesto y teléfono de la oficina de aquellos empleados que no
-sean representante de ventas de ningún cliente.(Utilizar IN, NOT IN)*/
-SELECT e.nombre, e.apellido1, e.puesto, o.telefono FROM oficina o JOIN empleado e ON o.codigo_oficina = e.codigo_oficina WHERE e.codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente);
+/*17. Devuelve el nombre, apellidos, puesto y teléfono de la oficina de aquellos empleados que no sean representante de ventas de ningún cliente.(Utilizar IN, NOT IN)*/
+SELECT CONCAT(e.nombre, ' ', e.apellido1) AS "Nombre y apellido", e.puesto, o.telefono FROM oficina o JOIN empleado e ON o.codigo_oficina = e.codigo_oficina WHERE e.codigo_empleado NOT IN (SELECT codigo_empleado_rep_ventas FROM cliente);
 
 /*18. Devuelve un listado que muestre solamente a los clientes que no han realizado ningún pago.
 (Utilizar EXISTS y NOT EXISTS)*/
